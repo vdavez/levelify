@@ -1,5 +1,9 @@
 'use strict';
 
+String.prototype.replaceBetween = function(start, end, what) {
+    return this.substring(0, start) + what + this.substring(end);
+};
+
 var Leveler = class {
   /**
    * constructor
@@ -19,8 +23,9 @@ var Leveler = class {
   setLevels(levels) {
     if (!levels) {
       // TODO: Define default level definition
+      var levels = ["$1.0","$1.$1"];
       // Presumably 1.0, 1.1, 1.1.1, because that's how contracts typically roll
-      return "hello"
+      return levels
     }
     else {
       // TODO: Need to validate that the levels definition is valid
@@ -71,9 +76,7 @@ var Leveler = class {
       if (i > 0){
         self.iterate(i)
         var header = ""
-        for (var j = 1; j <= i; j++) {
-          header += self.counter[j-1] + "."
-        }
+        header += self.applyLevel(i-1)
         return header + " " + d["text"]
       }
       return d["text"]
@@ -81,11 +84,47 @@ var Leveler = class {
     return res.join('\n');
   }
 
+  /**
+   *
+   **/
   iterate (i) {
     if (!this.counter[i-1]) {
       return this.counter[i-1] = 1
     }
     return this.counter[i-1] += 1;
+  }
+
+  /**
+   *
+   **/
+  parseLevel(j) {
+    var re = /\$[1AaIi]/g;
+    return this.levels[j].match(re)
+  }
+
+  /**
+   *
+   **/
+  applyLevel(j) {
+    var header = "";
+    var leveler = this.levels[j];
+    var parsed = this.parseLevel(j);
+    for (var level = 0; level < parsed.length; level++) {
+      switch (parsed[level]) {
+        case "$1":
+          var re = /\$1/g;
+          var idx;
+          var out = leveler;
+          var k = 0;
+          while (idx = re.exec(leveler)) {
+            var i = re.lastIndex - k;
+            out = out.replaceBetween(i-2, i, this.counter[k])
+            k++;
+          }
+          return out;
+      }
+    }
+    return header;
   }
 }
 

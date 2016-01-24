@@ -7,8 +7,8 @@
     "test": "tests"
   },
   "scripts": {
-    "prebuild": "node_modules/.bin/babel levelify.js > levelify.min.js",
-    "build": "node_modules/.bin/browserify levelify.min.js -s Levelify | node_modules/.bin/uglifyjs -c > levelify.min.js",
+    "prebuild": "node_modules/.bin/babel levelify.js > levelify.babel.js",
+    "build": "node_modules/.bin/browserify levelify.babel.js -s Levelify | node_modules/.bin/uglifyjs -c > levelify.min.js && rm levelify.babel.js",
     "test": "node_modules/.bin/tape tests/**/*.js"
   },
   "author": "",
