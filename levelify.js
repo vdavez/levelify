@@ -1,4 +1,5 @@
 'use strict';
+var romanize = require('romanize');
 
 String.prototype.replaceBetween = function(start, end, what) {
     return this.substring(0, start) + what + this.substring(end);
@@ -119,11 +120,16 @@ var Leveler = class {
           out = out.replaceBetween(i-2, i, this.counter[(j-parsed.length+k+1)]);
           break;
         case "$A":
-          debugger;
           out = out.replaceBetween(i-2, i, String.fromCharCode(64+this.counter[(j-parsed.length+k+1)]));
           break;
         case "$a":
           out = out.replaceBetween(i-2, i, String.fromCharCode(64+this.counter[(j-parsed.length+k+1)]));
+          break;
+        case "$I":
+          out = out.replaceBetween(i-2, i, romanize(this.counter[(j-parsed.length+k+1)]));
+          break;
+        case "$i":
+          out = out.replaceBetween(i-2, i, romanize(this.counter[(j-parsed.length+k+1)]).toLowerCase());
           break;
 
       }
