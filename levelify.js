@@ -1,61 +1,92 @@
-var _ = require('underscore');
+'use strict';
 
-module.exports = function Leveler(str, type) {
-	return {
-		out: level(str, type)
-	};
+var Leveler = class {
+  /**
+   * constructor
+   **/
+  constructor (inputText, levels) {
+    var self = this;
+    self.counter = [0,0]
+    self.inputText = inputText.trim();
+    self.levels = self.setLevels(levels); // Set the level definition for the Leveler
+    var l = self.getLevelsFromText();
+    self.results = self.convert(l);
+  }
+
+  /**
+   * setLevels
+   **/
+  setLevels(levels) {
+    if (!levels) {
+      // TODO: Define default level definition
+      // Presumably 1.0, 1.1, 1.1.1, because that's how contracts typically roll
+      return "hello"
+    }
+    else {
+      // TODO: Need to validate that the levels definition is valid
+    }
+    return levels;
+  }
+
+  /**
+   * getLevelsFromText
+   *
+   * expected results look like:
+   * [
+   *   {'depth':1,'text':'This is a test'},
+   *   {'depth':0, 'text':'This is just plain text.'},
+   *   {'depth':2,'text':'This is also a test.'},
+   *   {'depth':0,'text':'This is also plain text.'},
+   *   {'depth':2,'text':'Super cool leveling is neat.'},
+   *   {'depth':1,'text':'WOOO!'}
+   * ]
+   *
+   **/
+  getLevelsFromText() {
+    var re = /^((l)+)\.\s(.*)/;
+    return this.inputText.split('\n').map(function (d){
+      var level = {};
+      var depth = re.exec(d);
+      if (depth) {
+        level["depth"] = depth[1].length;
+        level["text"] = depth[depth.length - 1];
+      }
+      else {
+        level["depth"] = 0;
+        level["text"] = d;
+      }
+      return level;
+    });
+  }
+
+  /**
+   * convert
+   **/
+  convert (depth){
+    var self = this;
+    // Take the level definition
+    // Iterate through the depths, convert the depth to match the level definition, and iterate on that definition
+    var res = depth.map(function (d){
+      var i = d["depth"]
+      if (i > 0){
+        self.iterate(i)
+        var header = ""
+        for (var j = 1; j <= i; j++) {
+          header += self.counter[j-1] + "."
+        }
+        return header + " " + d["text"]
+      }
+      return d["text"]
+    })
+    return res.join('\n');
+  }
+
+  iterate (i) {
+    if (!this.counter[i-1]) {
+      return this.counter[i-1] = 1
+    }
+    return this.counter[i-1] += 1;
+  }
 }
 
-function level (str, type) {
-	var out = [];
-	var xrefer = []
-	var arr = str.split("\n")
-	counter = [0]
-	_.each(arr, function (m, i, array) {
-		out[i] = m.replace(/^(l+)\.(\s\|(\w|\_|\-)+\|)?/, function() {
-			counter = countIt(arguments[1], counter)
-			var head = headingFor(counter, type)
-			// Check for cross-references
-			if (arguments[2] != undefined && arguments[2] != "") {
-				xrefer.push({"xref":arguments[2].trim(), "index": i, "head":head.trim()})
-			}
-			return head
-		})
-	})
-	var returnStr = out.join('\n')
-	_.each(xrefer, function (m, i, xlist) {
-		returnStr = returnStr.replace(m.xref, m.head)
-	})
-
-	return returnStr;
-}
-
-function countIt (match, counter) {
-	if (match.length == counter.length) {
-  		counter[counter.length-1] += 1;
-  		return counter;
-	}
-
-	else if (match.length > counter.length) {
-		var digits = match.length - counter.length;
-		for (var i=0; i<digits; i++) {
-    		counter.push(1);
-		}
-		return counter;
-	}
-
-	else if (match.length < counter.length) {
-  		counter = counter.slice(0, match.length);
-  		counter[counter.length-1] += 1;
-  		return counter;
-	}
-}
-
-function headingFor(counter, type) {
-  //iterate over each level
-  var l = counter.length - 1
-  if (type[l] == undefined) return counter[l]
-  else return type[l].form.replace("$x", testChar(type[l].num,counter[l]))
-}
-
-function testChar(a,b){var c=a.toString().charCodeAt(0);return 65==c?indexToChar(b,!0):97==c?indexToChar(b,!1):73==c?romanize(b):105==c?romanize(b).toLowerCase():b}function indexToChar(a,b){return b?String.fromCharCode(a+64):String.fromCharCode(a+96)}function romanize(a){if(!+a)return!1;for(var b=String(+a).split(""),c=["","C","CC","CCC","CD","D","DC","DCC","DCCC","CM","","X","XX","XXX","XL","L","LX","LXX","LXXX","XC","","I","II","III","IV","V","VI","VII","VIII","IX"],d="",e=3;e--;)d=(c[+b.pop()+10*e]||"")+d;return Array(+b.join("")+1).join("M")+d}
+module.exports = Leveler;
