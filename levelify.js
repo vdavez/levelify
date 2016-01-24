@@ -22,7 +22,7 @@ function level (str, type) {
 			return head
 		})
 	})
-	var returnStr = out.join('\n\n')
+	var returnStr = out.join('\n')
 	_.each(xrefer, function (m, i, xlist) {
 		returnStr = returnStr.replace(m.xref, m.head)
 	})
