@@ -23,7 +23,7 @@ var Leveler = class {
   setLevels(levels) {
     if (!levels) {
       // TODO: Define default level definition
-      var levels = ["$1.0","$1.$1"];
+      var levels = ["$1.0","$1.$1","$1.$1.$1."];
       // Presumably 1.0, 1.1, 1.1.1, because that's how contracts typically roll
       return levels
     }
@@ -106,25 +106,30 @@ var Leveler = class {
    *
    **/
   applyLevel(j) {
-    var header = "";
     var leveler = this.levels[j];
     var parsed = this.parseLevel(j);
-    for (var level = 0; level < parsed.length; level++) {
-      switch (parsed[level]) {
+    var re = /\$[1AaIi]/g;
+    var idx;
+    var out = leveler;
+    var k = 0; // because we're losing the $, we have to account for the shorter string...
+    while (idx = re.exec(leveler)) {  //this is
+      var i = re.lastIndex - k;
+      switch (parsed[k]) {
         case "$1":
-          var re = /\$1/g;
-          var idx;
-          var out = leveler;
-          var k = 0;
-          while (idx = re.exec(leveler)) {
-            var i = re.lastIndex - k;
-            out = out.replaceBetween(i-2, i, this.counter[k])
-            k++;
-          }
-          return out;
+          out = out.replaceBetween(i-2, i, this.counter[(j-parsed.length+k+1)]);
+          break;
+        case "$A":
+          debugger;
+          out = out.replaceBetween(i-2, i, String.fromCharCode(64+this.counter[(j-parsed.length+k+1)]));
+          break;
+        case "$a":
+          out = out.replaceBetween(i-2, i, String.fromCharCode(64+this.counter[(j-parsed.length+k+1)]));
+          break;
+
       }
+      k++;
     }
-    return header;
+    return out;
   }
 }
 
