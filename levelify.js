@@ -131,7 +131,6 @@ var Leveler = class {
         case "$i":
           out = out.replaceBetween(i-2, i, romanize(this.counter[(j-parsed.length+k+1)]).toLowerCase());
           break;
-
       }
       k++;
     }
