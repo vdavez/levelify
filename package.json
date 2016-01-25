@@ -7,15 +7,19 @@
     "test": "tests"
   },
   "scripts": {
-    "build": "node_modules/.bin/browserify levelify.js -s Levelify | node_modules/.bin/uglifyjs -c > levelify.min.js",
+    "prebuild": "node_modules/.bin/babel levelify.js > levelify.babel.js",
+    "build": "node_modules/.bin/browserify levelify.babel.js -s Levelify | node_modules/.bin/uglifyjs -c > levelify.min.js && rm levelify.babel.js",
     "test": "node_modules/.bin/tape tests/**/*.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "underscore": "^1.8.3"
+    "romanize": "^0.1.0"
   },
   "devDependencies": {
+    "babel-cli": "^6.4.5",
+    "babel-preset-es2015": "^6.3.13",
+    "babelify": "^7.2.0",
     "browserify": "^13.0.0",
     "tape": "^4.4.0"
   }
